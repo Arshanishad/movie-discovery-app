@@ -36,6 +36,11 @@ dependencies:
   cupertino_icons: ^1.0.8
   cached_network_image: ^4.0.0
   flutter_bloc: ^9.1.1
+  shared_preferences: ^2.5.5
+  dio: ^5.11.0
+  logger: ^2.7.0
+  bloc_concurrency: ^0.3.0
+  shimmer: ^4.0.0
 
 dev_dependencies:
   flutter_test:

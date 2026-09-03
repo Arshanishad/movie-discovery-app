@@ -15,14 +15,21 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    Future.delayed(Duration(milliseconds: 5), () {
-      if (context.mounted) {
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => UserNameScreen()),
-        );
-      }
-    });
+    _goToUsernameScreen();
+  }
+
+
+  Future<void> _goToUsernameScreen() async {
+    await Future.delayed(
+      const Duration(seconds: 2),
+    );
+    if (!mounted) return;
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const UserNameScreen(),
+      ),
+    );
   }
 
   @override

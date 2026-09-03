@@ -26,7 +26,6 @@ class _MoreScreenState extends State<MoreScreen> {
     return Scaffold(
       backgroundColor: Palette.greyColor,
       extendBodyBehindAppBar: true,
-
       body: SingleChildScrollView(
         child: Column(
           children: [

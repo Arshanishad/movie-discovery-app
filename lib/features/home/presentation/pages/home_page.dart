@@ -1,236 +1,90 @@
 import 'package:flutter/material.dart';
-import 'package:movie_discovery_app/core/constants/Image_constants.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:movie_discovery_app/core/api/api_client.dart';
 import 'package:movie_discovery_app/core/constants/constants.dart';
-import 'package:movie_discovery_app/core/theme/palette.dart';
+import 'package:movie_discovery_app/features/home/data/datasources/home_remote_data_source.dart';
+import 'package:movie_discovery_app/features/home/data/repositories/home_repository_impl.dart';
+import 'package:movie_discovery_app/features/home/domain/usecases/get_popular_movies.dart';
+import 'package:movie_discovery_app/features/home/domain/usecases/get_now_playing_movies.dart';
+import 'package:movie_discovery_app/features/home/domain/usecases/get_top_rated.dart';
+import 'package:movie_discovery_app/features/home/domain/usecases/get_trending_movies.dart';
+import 'package:movie_discovery_app/features/home/presentation/bloc/home_bloc.dart';
+import 'package:movie_discovery_app/features/home/presentation/bloc/home_event.dart';
+import 'package:movie_discovery_app/features/home/presentation/bloc/home_state.dart';
+import 'package:movie_discovery_app/features/home/presentation/widgets/home_banner.dart';
+import 'package:movie_discovery_app/features/home/presentation/widgets/home_previews.dart';
+import 'package:movie_discovery_app/features/home/presentation/widgets/home_top_actions.dart';
+import 'package:movie_discovery_app/features/home/presentation/widgets/now_playing_section.dart';
+import 'package:movie_discovery_app/features/home/presentation/widgets/popular_movies_section.dart';
+import 'package:movie_discovery_app/features/home/presentation/widgets/top_rated_section.dart';
+import 'package:movie_discovery_app/features/home/presentation/widgets/trending_movies_section.dart';
 
 class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+  final String username;
+  const HomePage({super.key, required this.username});
 
   @override
   State<HomePage> createState() => _HomePageState();
 }
 
 class _HomePageState extends State<HomePage> {
-  final List previewImages = [
-    ImageConstants.previewImage1,
-    ImageConstants.previewImage1,
-    ImageConstants.previewImage1,
-    ImageConstants.previewImage1,
-    ImageConstants.previewImage1,
-  ];
   @override
   Widget build(BuildContext context) {
     w = MediaQuery.of(context).size.width;
     h = MediaQuery.of(context).size.height;
-    return Scaffold(
-      backgroundColor: Palette.blackColor,
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            SizedBox(
-              width: double.infinity,
-              height: h * 0.45,
-              child: Stack(
-                children: [
-                  Positioned.fill(
-                    child: Image.asset(
-                      ImageConstants.bannerImage,
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-                  Padding(
-                    padding: EdgeInsetsGeometry.all(w * 0.07),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        Image.asset(ImageConstants.netflixIcon),
-                        Text(
-                          "Tv Shows ",
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: w * 0.05,
-                          ),
-                        ),
-                        Text(
-                          "Movies",
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: w * 0.05,
-                          ),
-                        ),
-                        Text(
-                          "My List  ",
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: w * 0.05,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Container(
-                  height: w * 0.07,
-                  width: w * 0.07,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.rectangle,
-                    border: Border.all(color: Colors.white),
-                  ),
-                  child: FittedBox(
-                    fit: BoxFit.scaleDown,
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          "TOP",
-                          style: TextStyle(
-                            fontSize: w * 0.02,
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        Text(
-                          "10",
-                          style: TextStyle(
-                            fontSize: w * 0.02,
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                SizedBox(width: w * 0.02),
-                Text(
-                  "#2 in Nigeria Today",
-                  style: TextStyle(color: Colors.white, fontSize: w * 0.04),
-                ),
-              ],
-            ),
-            SizedBox(height: w * 0.03),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(Icons.add, color: Colors.white, size: w * 0.07),
-                      Text(
-                        "My List",
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: w * 0.04,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(top: 8),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Container(
-                        height: w * 0.1,
-                        width: w * 0.25,
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(w * 0.02),
-                        ),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              Icons.play_arrow,
-                              color: Palette.blackColor,
-                              size: w * 0.08,
-                            ),
-                            Text(
-                              "Play",
-                              style: TextStyle(
-                                fontSize: w * 0.04,
-                                color: Palette.blackColor,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                Expanded(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.info_outline,
-                        color: Colors.white,
-                        size: w * 0.08,
-                      ),
-                      Text(
-                        "Info",
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: w * 0.04,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            Padding(
-              padding: EdgeInsets.only(left: w * 0.04),
+
+    return BlocProvider(
+      create: (_) {
+        final apiClient = ApiClient();
+        final remoteDataSource = HomeRemoteDataSource(apiClient);
+        final repository = HomeRepositoryImpl(remoteDataSource);
+        final getPopularMovies = GetPopularMovies(repository);
+        final getTrendingMovies = GetTrendingMovies(repository);
+        final getNowPlayingMovies = GetNowPlayingMovies(repository);
+        final getTopRatedMovies = GetTopRatedMovies(repository);
+
+        return HomeBloc(
+          getPopularMovies,
+          getTrendingMovies,
+          getNowPlayingMovies,
+          getTopRatedMovies,
+        )..add(GetHomeMoviesEvent());
+      },
+      child: Scaffold(
+        backgroundColor: Colors.black,
+        body: BlocBuilder<HomeBloc, HomeState>(
+          builder: (context, state) {
+            return SingleChildScrollView(
               child: Column(
-                mainAxisAlignment: MainAxisAlignment.start,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    textAlign: TextAlign.start,
-                    "Previews",
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                      fontSize: w * 0.07,
+                  Padding(
+                    padding: EdgeInsets.only(
+                      left: w * 0.04,
+                      top: w * 0.05,
+                      bottom: w * 0.03,
+                    ),
+                    child: Text(
+                      'Welcome, ${widget.username}',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: w * 0.055,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
-                  SizedBox(
-                    height: w * 0.32,
-                    child: ListView.builder(
-                      scrollDirection: Axis.horizontal,
-                      itemCount: previewImages.length,
-                      itemBuilder: (context, index) {
-                        return Container(
-                          margin: EdgeInsets.only(right: w * 0.02),
-                          width: w * 0.30,
-                          decoration: const BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: Colors.white,
-                          ),
-                          child: Image.asset(
-                            previewImages[index],
-                            fit: BoxFit.contain,
-                          ),
-                        );
-                      },
-                    ),
-                  ),
+
+                  const HomeBanner(),
+                  const HomeTopActions(),
+                  const HomePreviews(),
+                  const PopularMoviesSection(),
+                  const TrendingMoviesSection(),
+                  const NowPlayingSection(),
+                  const TopRatedSection(),
                 ],
               ),
-            ),
-          ],
+            );
+          },
         ),
       ),
     );
