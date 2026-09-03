@@ -2,9 +2,28 @@ import 'package:flutter/material.dart';
 import 'package:movie_discovery_app/core/constants/Image_constants.dart';
 import 'package:movie_discovery_app/core/constants/constants.dart';
 import 'package:movie_discovery_app/core/theme/palette.dart';
+import 'package:movie_discovery_app/features/home/presentation/pages/username_screen.dart';
 
-class SplashScreen extends StatelessWidget {
+class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
+
+  @override
+  State<SplashScreen> createState() => _SplashScreenState();
+}
+
+class _SplashScreenState extends State<SplashScreen> {
+  @override
+  void initState() {
+    super.initState();
+    Future.delayed(Duration(milliseconds: 5), () {
+      if (context.mounted) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => UserNameScreen()),
+        );
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
