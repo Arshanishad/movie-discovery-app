@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:movie_discovery_app/core/constants/Image_constants.dart';
 import 'package:movie_discovery_app/core/constants/constants.dart';
 import 'package:movie_discovery_app/core/theme/palette.dart';
+import 'package:movie_discovery_app/features/home/presentation/pages/home_page.dart';
 
 class UserNameScreen extends StatefulWidget {
   const UserNameScreen({super.key});
@@ -30,44 +31,58 @@ class _UserNameScreenState extends State<UserNameScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Padding(
-              padding: EdgeInsets.only(left: w * 0.15, top: w * 0.08),
+              padding: EdgeInsets.only(left: w * 0.20, top: w * 0.08),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Image(image: AssetImage(ImageConstants.netFlixLogo)),
+                  Image(
+                    image: AssetImage(ImageConstants.netFlixLogo),
+                    width: w * 0.35,
+                  ),
                   SizedBox(width: w * 0.19),
-                  Icon(Icons.edit, color: Colors.white, size: w * 0.08),
+                  Icon(Icons.edit, color: Colors.white, size: w * 0.06),
                 ],
               ),
             ),
             Expanded(
               child: GridView.builder(
+                shrinkWrap: true,
                 padding: EdgeInsets.only(
-                  left: w * 0.1,
-                  right: w * 0.1,
+                  left: w * 0.2,
+                  right: w * 0.2,
                   top: w * 0.3,
                 ),
                 gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: 2,
-                  crossAxisSpacing: 10,
-                  mainAxisSpacing: 10,
+                  crossAxisSpacing: 35,
+                  mainAxisSpacing: 12,
                   childAspectRatio: 0.75,
                 ),
                 itemCount: usernames.length,
                 itemBuilder: (context, index) {
-                  return Container(
-                    alignment: Alignment.bottomCenter,
-                    child: Column(
-                      children: [
-                        Image.asset(usernames[index]["image"]),
-                        Text(
-                          usernames[index]["text"],
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: w * 0.05,
+                  return InkWell(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => HomePage()),
+                      );
+                    },
+                    child: Container(
+                      alignment: Alignment.bottomCenter,
+                      child: Column(
+                        children: [
+                          Image.asset(usernames[index]["image"]),
+                          Text(
+                            usernames[index]["text"],
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: w * 0.04,
+                              fontWeight: FontWeight.w400,
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   );
                 },
@@ -75,33 +90,42 @@ class _UserNameScreenState extends State<UserNameScreen> {
             ),
             SizedBox(height: w * 0.05),
             Transform.translate(
-              offset: const Offset(0, -26),
+              offset: const Offset(0, -180),
               child: Padding(
-                padding: EdgeInsets.only(left: w * 0.15),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Container(
-                      width: w * 0.15,
-                      height: h * 0.08,
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        shape: BoxShape.circle,
+                padding: EdgeInsets.only(left: w * 0.2),
+                child: GestureDetector(
+                  onTap: () {
+                    print("PROFILE CLICKED");
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => HomePage()),
+                    );
+                  },
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Container(
+                        width: w * 0.13,
+                        height: h * 0.08,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          shape: BoxShape.circle,
+                        ),
+                        child: Image.asset(ImageConstants.plusIcon),
                       ),
-                      child: Image.asset(ImageConstants.plusIcon),
-                    ),
-                    SizedBox(height: w * 0.03),
-                    Text(
-                      'Add Profile',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: w * 0.04,
-                        fontWeight: FontWeight.w400,
-                        leadingDistribution: TextLeadingDistribution.even,
+                      SizedBox(height: w * 0.03),
+                      Text(
+                        'Add Profile',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: w * 0.035,
+                          fontWeight: FontWeight.w400,
+                          leadingDistribution: TextLeadingDistribution.even,
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ),

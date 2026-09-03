@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:movie_discovery_app/features/home/presentation/pages/splash_screen.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:movie_discovery_app/features/navigation/presentation/bloc/navbar_bloc.dart';
+import 'package:movie_discovery_app/features/navigation/presentation/pages/navbar.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(BlocProvider(create: (_)=>NavbarBloc(),
+  child: const MyApp()));
 }
 
 class MyApp extends StatelessWidget {
@@ -24,7 +27,7 @@ class MyApp extends StatelessWidget {
           colorScheme: .fromSeed(seedColor: Colors.deepPurple),
           fontFamily: 'SF Pro Display',
         ),
-        home: SplashScreen(),
+        home: Navbar(),
       ),
     );
   }
