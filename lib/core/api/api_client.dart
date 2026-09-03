@@ -27,7 +27,6 @@ class ApiClient {
           receiveTimeout: const Duration(seconds: 60),
           headers: {
             'Content-Type': 'application/json',
-            // 'Authorization': 'Bearer ${ApiConstants.readAccesToken}',
             'Authorization':
     'Bearer ${const String.fromEnvironment('TMDB_TOKEN')}',
           },
