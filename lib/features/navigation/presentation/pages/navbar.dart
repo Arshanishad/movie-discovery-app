@@ -1,22 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:movie_discovery_app/core/constants/Image_constants.dart';
+import 'package:movie_discovery_app/features/download/presentation/pages/download_screen.dart';
 import 'package:movie_discovery_app/features/home/presentation/pages/home_page.dart';
 import 'package:movie_discovery_app/features/home/presentation/pages/splash_screen.dart';
 import 'package:movie_discovery_app/features/home/presentation/pages/username_screen.dart';
+import 'package:movie_discovery_app/features/more/presentation/pages/more_screen.dart';
 import 'package:movie_discovery_app/features/navigation/presentation/bloc/navbar_bloc.dart';
 import 'package:movie_discovery_app/features/navigation/presentation/bloc/navbar_event.dart';
 import 'package:movie_discovery_app/features/navigation/presentation/bloc/navbar_state.dart';
+import 'package:movie_discovery_app/features/search/presentation/search_screen.dart';
 
 class Navbar extends StatelessWidget {
   const Navbar({super.key});
 
   final List<Widget> pages = const [
     HomePage(),
-    UserNameScreen(),
+    SearchScreen(),
     SplashScreen(),
-    HomePage(),
-    HomePage(),
+    DownloadScreen(),
+    MoreScreen(),
   ];
 
   @override
@@ -28,9 +31,7 @@ class Navbar extends StatelessWidget {
           bottomNavigationBar: BottomNavigationBar(
             currentIndex: state.selectedIndex,
             onTap: (index) {
-              context.read<NavbarBloc>().add(
-                ChangeNavbarIndex(index),
-              );
+              context.read<NavbarBloc>().add(ChangeNavbarIndex(index));
             },
             type: BottomNavigationBarType.fixed,
             items: [
@@ -47,12 +48,8 @@ class Navbar extends StatelessWidget {
               ),
 
               BottomNavigationBarItem(
-                icon: Image.asset(
-                  ImageConstants.commingsoonIcon,
-                ),
-                activeIcon: Image.asset(
-                  ImageConstants.commingsoonIcon,
-                ),
+                icon: Image.asset(ImageConstants.commingsoonIcon),
+                activeIcon: Image.asset(ImageConstants.commingsoonIcon),
                 label: 'Coming soon',
               ),
 
