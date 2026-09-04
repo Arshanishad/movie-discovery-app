@@ -1,37 +1,28 @@
 import 'dart:convert';
-import 'package:movie_discovery_app/core/constants/api_constants.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:logger/logger.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-
-Future<void> handleLogout403() async {
-  final prefs = await SharedPreferences.getInstance();
-  final token = prefs.getString('token');
-  if (token == null) return;
-  await prefs.remove('token');
-  await prefs.remove('userId');
-}
+import 'package:movie_discovery_app/core/constants/api_constants.dart';
 
 class ApiClient {
   final Dio _dio;
 
-  final Logger _logger = Logger(level: kDebugMode ? Level.debug : Level.off);
+  final Logger _logger = Logger(
+    level: Level.debug,
+  );
 
   ApiClient()
-    : _dio = Dio(
-        BaseOptions(
-          baseUrl: ApiConstants.baseUrl,
-          connectTimeout: const Duration(seconds: 60),
-          sendTimeout: const Duration(seconds: 60),
-          receiveTimeout: const Duration(seconds: 60),
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization':
-    'Bearer ${const String.fromEnvironment('TMDB_TOKEN')}',
-          },
-        ),
-      ) {
+      : _dio = Dio(
+          BaseOptions(
+            baseUrl: ApiConstants.baseUrl,
+            connectTimeout: const Duration(seconds: 30),
+            sendTimeout: const Duration(seconds: 30),
+            receiveTimeout: const Duration(seconds: 30),
+            headers: {
+              'Content-Type': 'application/json',
+            },
+          ),
+        ) {
     if (kDebugMode) {
       _dio.interceptors.add(
         LogInterceptor(
@@ -45,19 +36,18 @@ class ApiClient {
 
     _dio.interceptors.add(
       InterceptorsWrapper(
-        onRequest: (options, handler) async {
-          final prefs = await SharedPreferences.getInstance();
-          final token = prefs.getString('token');
-          if (token != null && token.isNotEmpty) {
-            options.headers['Authorization'] = 'Bearer $token';
-          }
+        onRequest: (options, handler) {
+          options.headers['Authorization'] = 'Bearer ${ApiConstants.tmdbToken}';
+
+          _logger.i('Requesting: ${options.baseUrl}${options.path}');
+
           return handler.next(options);
         },
-        onError: (DioException e, handler) async {
-          final statusCode = e.response?.statusCode;
-          if (statusCode == 401 || statusCode == 403) {
-            await handleLogout403();
-          }
+        onError: (DioException e, handler) {
+          _logger.e(
+            'Request FAILED: ${e.type} | ${e.message} | '
+            'URL: ${e.requestOptions.baseUrl}${e.requestOptions.path}',
+          );
           return handler.next(e);
         },
       ),
@@ -69,15 +59,12 @@ class ApiClient {
     Map<String, dynamic>? queryParameters,
   }) async {
     try {
-      final response = await _dio.get<T>(
+      return await _dio.get<T>(
         path.trim(),
         queryParameters: queryParameters,
       );
-      return response;
     } on DioException catch (e) {
-      if (kDebugMode) {
-        _logger.e('GET ${path.trim()} failed: ${e.message}');
-      }
+      _logger.e('GET ${path.trim()} failed: ${e.type} - ${e.message}');
       rethrow;
     }
   }
@@ -89,17 +76,14 @@ class ApiClient {
     Options? options,
   }) async {
     try {
-      final response = await _dio.post<T>(
-        path,
+      return await _dio.post<T>(
+        path.trim(),
         data: data,
         queryParameters: queryParameters,
         options: options,
       );
-      return response;
     } on DioException catch (e) {
-      if (kDebugMode) {
-        _logger.e('POST $path failed: ${e.message}');
-      }
+      _logger.e('POST ${path.trim()} failed: ${e.type} - ${e.message}');
       rethrow;
     }
   }
@@ -110,17 +94,38 @@ class ApiClient {
     Map<String, dynamic>? queryParameters,
   }) async {
     try {
-      final response = await _dio.post<T>(
-        path,
+      return await _dio.post<T>(
+        path.trim(),
         data: data,
         queryParameters: queryParameters,
-        options: Options(headers: {'Content-Type': 'multipart/form-data'}),
+        options: Options(
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        ),
       );
-      return response;
     } on DioException catch (e) {
-      if (kDebugMode) {
-        _logger.e('POST Multipart $path failed: ${e.message}');
-      }
+      _logger.e('POST Multipart ${path.trim()} failed: ${e.type} - ${e.message}');
+      rethrow;
+    }
+  }
+
+  Future<Response<T>> put<T>(
+    String path, {
+    dynamic data,
+    Map<String, dynamic>? headers,
+    Options? options,
+  }) async {
+    try {
+      return await _dio.put<T>(
+        path.trim(),
+        data: data,
+        options: (options ?? Options()).copyWith(
+          headers: headers,
+        ),
+      );
+    } on DioException catch (e) {
+      _logger.e('PUT ${path.trim()} failed: ${e.type} - ${e.message}');
       rethrow;
     }
   }
@@ -129,25 +134,18 @@ class ApiClient {
     String path, {
     Map<String, dynamic>? queryParameters,
   }) async {
-    final response = await get(path, queryParameters: queryParameters);
+    final response = await get<dynamic>(
+      path,
+      queryParameters: queryParameters,
+    );
+
     final data = response.data;
+
     if (data is String) {
       return jsonDecode(data);
-    } else {
-      return data;
     }
-  }
 
-  Future<Response> put(
-    String path, {
-    dynamic data,
-    Map<String, dynamic>? headers,
-    Options? options,
-  }) async {
-    return await _dio.put(
-      path,
-      data: data,
-      options: (options ?? Options()).copyWith(headers: headers),
-    );
+    return data;
   }
 }
+
