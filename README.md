@@ -2,7 +2,7 @@
 
 A Flutter movie discovery application built as part of a technical assignment.
 
-The application uses the **TMDB API** to allow users to discover popular, trending, now-playing, top-rated, and upcoming movies. It also provides movie search, pagination, cached images, loading states, error handling, and retry functionality.
+The application uses the **TMDB API** to allow users to discover popular, trending, now-playing, top-rated, and upcoming movies. It also provides movie search, pagination, cached images, loading states, error handling, retry functionality, username/profile selection, and bottom navigation.
 
 The project follows **Clean Architecture** and uses **BLoC** for state management.
 
@@ -23,25 +23,75 @@ The project follows **Clean Architecture** and uses **BLoC** for state managemen
 * ⚠️ API Error Handling
 * 🔄 Retry on API Failure
 * 📭 Empty States
-* 👤 Profile Selection
+* 👤 Username / Profile Selection
+* 🧭 Bottom Navigation
+* 🏠 Home
+* 🔍 Search
+* 📅 Coming Soon
+* ⬇️ Downloads
+* ☰ Menu
 * 📱 Responsive UI
 * 🏗️ Clean Architecture
 * 🔄 BLoC State Management
 
 ---
 
+# 🧭 Application Flow
+
+The application follows a simple onboarding and navigation flow.
+
+```text
+Splash Screen
+      ↓
+Username / Profile Selection
+      ↓
+Select Username
+      ↓
+Main Application
+      ↓
+┌─────────┬─────────┬─────────────┬───────────┬─────────┐
+│  Home   │ Search  │ Coming Soon │ Downloads │  Menu   │
+└─────────┴─────────┴─────────────┴───────────┴─────────┘
+```
+
+### 1. Splash Screen
+
+When the application starts, a splash screen is displayed before navigating to the username/profile selection screen.
+
+### 2. Username / Profile Selection
+
+After the splash screen, the user is taken to the username/profile selection screen.
+
+The user can select a username from the available profile options.
+
+After selecting a username, the application navigates to the main application interface.
+
+### 3. Main Application
+
+The main application provides bottom navigation to access the available sections.
+
+| Screen         | Description                                                   |
+| -------------- | ------------------------------------------------------------- |
+| 🏠 Home        | Displays popular, trending, now-playing, and top-rated movies |
+| 🔍 Search      | Allows users to search for movies                             |
+| 📅 Coming Soon | Displays upcoming movies                                      |
+| ⬇️ Downloads   | Provides access to downloaded movie content                   |
+| ☰ Menu         | Provides additional application options                       |
+
+---
+
 # 🛠️ Tech Stack
 
-| Technology            | Purpose                |
-| ---------------------- | ---------------------- |
-| Flutter                | Application framework  |
-| Dart                    | Programming language   |
-| BLoC                    | State management       |
-| Dio                     | HTTP client             |
-| TMDB API                | Movie data              |
-| Cached Network Image    | Image caching           |
-| Shimmer                 | Loading placeholders    |
-| Logger                  | Debug/error logging     |
+| Technology           | Purpose               |
+| -------------------- | --------------------- |
+| Flutter              | Application framework |
+| Dart                 | Programming language  |
+| BLoC                 | State management      |
+| Dio                  | HTTP client           |
+| TMDB API             | Movie data            |
+| Cached Network Image | Image caching         |
+| Shimmer              | Loading placeholders  |
+| Logger               | Debug/error logging   |
 
 ---
 
@@ -68,6 +118,7 @@ Responsible for:
 * BLoC
 * UI states
 * User interactions
+* Navigation
 
 ### Domain
 
@@ -97,7 +148,7 @@ This separation makes the application easier to maintain, test, and extend.
 ```text
 lib/
 ├── core/
-│   ├── network/
+│   ├── api/
 │   │   └── api_client.dart
 │   ├── constants/
 │   │   ├── api_constants.dart
@@ -124,13 +175,13 @@ lib/
     │   ├── domain/
     │   └── presentation/
     │
-    └── coming_soon/
+    └── comming_soon/
         ├── data/
         ├── domain/
         └── presentation/
 ```
 
-> **Note:** Update the `core/network/` path above if `api_client.dart` actually lives in a different folder in your project (e.g. `core/api/`). This tree must match your real file structure, or reviewers following the import paths will get errors.
+> **Note:** Make sure the folder names in this structure match the actual project structure. If the actual folder is named `coming_soon`, use that name instead of `comming_soon`.
 
 ---
 
@@ -146,14 +197,14 @@ https://api.themoviedb.org/3
 
 ### Endpoints Used
 
-| Endpoint                | Purpose                              |
-| ------------------------ | ------------------------------------- |
-| `/movie/popular`         | Fetch popular movies                  |
-| `/trending/all/week`     | Fetch weekly trending (all media types)|
-| `/movie/now_playing`     | Fetch now-playing movies              |
-| `/movie/top_rated`       | Fetch top-rated movies                |
-| `/movie/upcoming`        | Fetch upcoming movies                 |
-| `/search/movie`          | Search for movies                     |
+| Endpoint             | Purpose                      |
+| -------------------- | ---------------------------- |
+| `/movie/popular`     | Fetch popular movies         |
+| `/trending/all/week` | Fetch weekly trending movies |
+| `/movie/now_playing` | Fetch now-playing movies     |
+| `/movie/top_rated`   | Fetch top-rated movies       |
+| `/movie/upcoming`    | Fetch upcoming movies        |
+| `/search/movie`      | Search for movies            |
 
 The application consumes movie data from the API rather than using hard-coded movie lists.
 
@@ -163,27 +214,32 @@ The application consumes movie data from the API rather than using hard-coded mo
 
 A **TMDB API Read Access Token** is required to run the application.
 
-The token is stored directly in `lib/core/constants/api_constants.dart`:
+The token is provided using Dart's `--dart-define` mechanism and is not hardcoded in the source code.
 
-```dart
-class ApiConstants {
-  static const String baseUrl = "https://api.themoviedb.org/3";
-  static const String tmdbToken = "YOUR_TMDB_READ_ACCESS_TOKEN";
-  ...
-}
-```
-
-It is read by `ApiClient` and attached to every request as:
+The application expects the token through:
 
 ```text
-Authorization: Bearer <tmdbToken>
+TMDB_TOKEN
 ```
 
-No `--dart-define` flag is required to run or build the app — the token is compiled in directly.
+For example, the application can read it using:
+
+```dart
+static const String tmdbToken =
+    String.fromEnvironment('TMDB_TOKEN');
+```
+
+The `ApiClient` attaches the token to API requests using:
+
+```text
+Authorization: Bearer <TMDB_READ_ACCESS_TOKEN>
+```
+
+The application uses the TMDB **Read Access Token**, not the TMDB API Key.
 
 ## Step 1 — Create a TMDB Account
 
-Create/sign in to a TMDB account.
+Create or sign in to a TMDB account.
 
 Go to your TMDB account settings and open the **API** section.
 
@@ -193,22 +249,25 @@ Create an API credential and use the:
 API Read Access Token
 ```
 
-The application uses the TMDB **Read Access Token**, not the API Key.
+## Step 2 — Run the Application
 
-## Step 2 — Add Your Token
+Pass your token using `--dart-define`:
 
-Open `lib/core/constants/api_constants.dart` and replace the placeholder:
-
-```dart
-static const String tmdbToken = "PASTE_YOUR_TOKEN_HERE";
+```bash
+flutter run --dart-define=TMDB_TOKEN=YOUR_TMDB_READ_ACCESS_TOKEN
 ```
 
-> ⚠️ **Security note:** Because the token is hardcoded, it will be compiled
-> into the release APK and can potentially be extracted by decompiling the
-> app (e.g. with `jadx`). This is acceptable for assignment/demo purposes,
-> but is **not recommended for a production app** with real users — a
-> production app should proxy TMDB requests through your own backend so
-> the token never ships inside the client.
+No token needs to be added directly to the source code.
+
+## Step 3 — Build the Release APK
+
+Pass the token when building the release APK:
+
+```bash
+flutter build apk --release --dart-define=TMDB_TOKEN=YOUR_TMDB_READ_ACCESS_TOKEN
+```
+
+> ⚠️ **Security note:** Using `--dart-define` keeps the token out of the source repository, but values supplied to a distributed application can still potentially be extracted from the compiled APK. This approach is suitable for an assignment/demo application. For a production application, API credentials should preferably be protected behind a backend/proxy service.
 
 ---
 
@@ -264,19 +323,13 @@ flutter pub get
 
 ## 3. Run the Application
 
-Make sure you've added your token to `lib/core/constants/api_constants.dart`
-(see [TMDB API Configuration](#-tmdb-api-configuration) above), then run:
+Provide the TMDB Read Access Token using `--dart-define`:
 
 ```bash
-flutter run
+flutter run --dart-define=TMDB_TOKEN=YOUR_TMDB_READ_ACCESS_TOKEN
 ```
 
-No `--dart-define` flag is needed — the token is read directly from
-`ApiConstants.tmdbToken`.
-
-> Do not commit your real token to a public GitHub repository. If this
-> project is public, keep `api_constants.dart` in `.gitignore` and commit
-> a placeholder version instead (see Security section below).
+The token does not need to be added to the source code.
 
 ---
 
@@ -293,7 +346,7 @@ flutter devices
 Then run:
 
 ```bash
-flutter run
+flutter run --dart-define=TMDB_TOKEN=YOUR_TMDB_READ_ACCESS_TOKEN
 ```
 
 Flutter will build, install, and launch the application on the connected device.
@@ -302,13 +355,14 @@ Flutter will build, install, and launch the application on the connected device.
 
 # 📦 Build Release APK
 
-Make sure your token is set in `lib/core/constants/api_constants.dart`
-before building.
+Before building, make sure the TMDB token is provided through `--dart-define`.
 
-To create a release APK:
+Run:
 
 ```bash
-flutter build apk --release
+flutter clean
+flutter pub get
+flutter build apk --release --dart-define=TMDB_TOKEN=YOUR_TMDB_READ_ACCESS_TOKEN
 ```
 
 The generated APK will be located at:
@@ -319,10 +373,31 @@ build/app/outputs/flutter-apk/app-release.apk
 
 The APK can then be installed on an Android device for testing.
 
-> **Note:** This project includes a custom `network_security_config.xml`
-> (referenced from `AndroidManifest.xml` via `android:networkSecurityConfig`)
-> to ensure HTTPS API calls to TMDB succeed reliably in release builds
-> across different Android devices and network configurations.
+### Release APK Testing
+
+Before submitting the APK, install the **exact release APK** on a physical device and verify the complete application flow.
+
+Test:
+
+* Splash screen
+* Username/profile selection
+* Username selection and navigation
+* Home screen
+* Popular movies
+* Trending movies
+* Now Playing movies
+* Top Rated movies
+* Search
+* Coming Soon
+* Downloads
+* Menu
+* Bottom navigation
+* Movie pagination
+* Retry after API failure
+* Empty states
+* Loading states
+* Cached images
+* Closing and reopening the application
 
 ---
 
@@ -364,7 +439,7 @@ Pagination handles:
 * Duplicate request prevention
 * End-of-results handling
 * Additional page requests
-* Shimmer loading cards
+* Loading indicators for additional results
 
 ---
 
@@ -406,7 +481,7 @@ Displays an error message and provides a retry action.
 
 Displays loading indicators while additional pages are being fetched.
 
-This prevents blank screens and gives the user feedback during network operations.
+This prevents blank screens and provides feedback during network operations.
 
 ---
 
@@ -425,16 +500,13 @@ The central API client is responsible for:
 * Multipart requests
 * API error logging
 
-The TMDB token (from `ApiConstants.tmdbToken`) is added to every request
-using the HTTP `Authorization` header:
+The TMDB token is provided through `--dart-define` and added to requests using the HTTP `Authorization` header:
 
 ```text
 Authorization: Bearer <TMDB_READ_ACCESS_TOKEN>
 ```
 
-An `onError` interceptor also logs the failure type (timeout, bad
-response, etc.) and the request URL, which is useful when diagnosing
-release-build networking issues.
+An error interceptor logs relevant request/error information during development, which helps diagnose API and networking issues.
 
 ---
 
@@ -458,6 +530,12 @@ Format the project:
 dart format lib test
 ```
 
+A clean project should ideally report:
+
+```text
+No issues found!
+```
+
 ---
 
 # 📊 Code Quality
@@ -478,24 +556,27 @@ The project follows:
 
 # 🔒 Security
 
-The TMDB token lives in `lib/core/constants/api_constants.dart`.
+The TMDB token is **not stored directly in the source code**.
 
-To avoid committing a real token to a public repository:
+It is supplied using:
 
-1. Add `lib/core/constants/api_constants.dart` to `.gitignore`.
-2. Commit a placeholder version instead — e.g. `api_constants.dart.example` —
-   with `tmdbToken` set to `"PASTE_YOUR_TOKEN_HERE"`.
-3. Anyone cloning the repo copies the example file, fills in their own
-   token, and builds normally.
+```bash
+--dart-define=TMDB_TOKEN=YOUR_TMDB_READ_ACCESS_TOKEN
+```
 
-> **Important:** Since the token is compiled directly into the app, it
-> will be present inside the built APK/AAB and can potentially be
-> extracted by decompiling the app. This is acceptable for an assignment
-> or demo build. For a production app handling real user traffic, TMDB
-> requests should be proxied through your own backend so the token never
-> ships inside the client binary.
+Do not commit the actual token to GitHub.
 
-Never commit the actual token to GitHub.
+Do not place the real token in:
+
+* Source files
+* README files
+* Screenshots
+* Commit messages
+* Public documentation
+
+> **Important:** `--dart-define` keeps the token out of the source repository, but it does not make the token completely secret inside a distributed APK. A determined user may potentially extract compiled application data.
+
+For a production application, protected API credentials should preferably be handled by a secure backend/proxy.
 
 ---
 
@@ -530,20 +611,25 @@ To run this project successfully:
 1. Clone the repository.
 2. Install Flutter dependencies.
 3. Obtain a TMDB API Read Access Token.
-4. Add the token to `lib/core/constants/api_constants.dart`
-   (`tmdbToken` field).
-5. Run the application using Flutter.
+4. Provide the token using `--dart-define`.
+5. Run the application.
 
 Example:
 
 ```bash
 flutter pub get
-flutter run
+flutter analyze
+flutter test
+flutter run --dart-define=TMDB_TOKEN=YOUR_TMDB_READ_ACCESS_TOKEN
 ```
 
-If you were given the token separately (e.g. by email, for grading
-purposes), paste it directly into `api_constants.dart` before running —
-no `--dart-define` flag is required.
+To build the release APK:
+
+```bash
+flutter build apk --release --dart-define=TMDB_TOKEN=YOUR_TMDB_READ_ACCESS_TOKEN
+```
+
+The TMDB Read Access Token is intentionally not included in the repository.
 
 ---
 
