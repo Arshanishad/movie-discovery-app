@@ -59,50 +59,51 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
 
 
   Future<void> _getHomeMovies(
-    GetHomeMoviesEvent event,
-    Emitter<HomeState> emit,
-  ) async {
-    popularPage = 1;
-    trendingPage = 1;
-    nowPlayingPage = 1;
-    topRatedPage = 1;
+  GetHomeMoviesEvent event,
+  Emitter<HomeState> emit,
+) async {
+  popularPage = 1;
+  trendingPage = 1;
+  nowPlayingPage = 1;
+  topRatedPage = 1;
 
-    popularHasReachedEnd = false;
-    trendingHasReachedEnd = false;
-    nowPlayingHasReachedEnd = false;
-    topRatedHasReachedEnd = false;
+  popularHasReachedEnd = false;
+  trendingHasReachedEnd = false;
+  nowPlayingHasReachedEnd = false;
+  topRatedHasReachedEnd = false;
 
-    isPopularLoadingMore = false;
-    isTrendingLoadingMore = false;
-    isNowPlayingLoadingMore = false;
-    isTopRatedLoadingMore = false;
+  isPopularLoadingMore = false;
+  isTrendingLoadingMore = false;
+  isNowPlayingLoadingMore = false;
+  isTopRatedLoadingMore = false;
 
-    emit(HomeLoading());
+  emit(HomeLoading());
 
-    try {
-      final results = await Future.wait([
-        getPopularMovies(1),
-        getTrendingMovies(1),
-        getNowPlayingMovies(1),
-        getTopRatedMovies(1),
-      ]);
+  try {
+    final popularMovies = await getPopularMovies(1);
 
-      emit(
-        HomeLoaded(
-          popularMovies: results[0],
-          trendingMovies: results[1],
-          nowPlayingMovies: results[2],
-          topRatedMovies: results[3],
-        ),
-      );
-    } catch (e) {
-      emit(
-        HomeError(
-          e.toString(),
-        ),
-      );
-    }
+    final trendingMovies = await getTrendingMovies(1);
+
+    final nowPlayingMovies = await getNowPlayingMovies(1);
+
+    final topRatedMovies = await getTopRatedMovies(1);
+
+    emit(
+      HomeLoaded(
+        popularMovies: popularMovies,
+        trendingMovies: trendingMovies,
+        nowPlayingMovies: nowPlayingMovies,
+        topRatedMovies: topRatedMovies,
+      ),
+    );
+  } catch (e) {
+    emit(
+      HomeError(
+        e.toString(),
+      ),
+    );
   }
+}
 
   Future<void> _loadMorePopularMovies(
     LoadMorePopularMoviesEvent event,
@@ -444,7 +445,6 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
         );
       }
     } catch (e) {
-      // Keep existing movies.
     }
 
     isTopRatedLoadingMore = false;

@@ -62,6 +62,7 @@ void dispose() {
               SizedBox(
                 height: h * 0.35,
                 child: ListView.builder(
+                  controller: _scrollController,
                   padding: EdgeInsets.only(
                     left: w * 0.04,
                   ),

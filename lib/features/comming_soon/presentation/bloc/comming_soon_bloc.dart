@@ -15,58 +15,82 @@ class ComingSoonBloc extends Bloc<ComingSoonEvent, ComingSoonState> {
   }
 
   Future<void> _getUpcomingMovies(
-    GetUpcomingMoviesEvent event,
-    Emitter<ComingSoonState> emit,
-  ) async {
+  GetUpcomingMoviesEvent event,
+  Emitter<ComingSoonState> emit,
+) async {
+  final isFirstPage = event.page == 1;
+
+  if (isFirstPage) {
+    currentPage = 1;
+    hasReachedEnd = false;
+    isLoadingMore = false;
+
+    emit(ComingSoonLoading());
+  } else {
     if (hasReachedEnd || isLoadingMore) {
       return;
     }
 
-    final isFirstPage = event.page == 1;
+    isLoadingMore = true;
+
+    final currentState = state;
+
+    if (currentState is ComingSoonLoaded) {
+      emit(
+        ComingSoonLoaded(
+          currentState.movies,
+          isLoadingMore: true,
+        ),
+      );
+    }
+  }
+
+  try {
+    final movies = await getUpcomingMovies(event.page);
+
+    if (movies.isEmpty) {
+      hasReachedEnd = true;
+      isLoadingMore = false;
+
+      if (isFirstPage) {
+        emit( ComingSoonLoaded([]));
+      }
+
+      return;
+    }
+
+    currentPage = event.page;
 
     if (isFirstPage) {
-      emit(ComingSoonLoading());
+      emit(
+        ComingSoonLoaded(
+          movies,
+          isLoadingMore: false,
+        ),
+      );
     } else {
-      isLoadingMore = true;
-
       final currentState = state;
 
       if (currentState is ComingSoonLoaded) {
-        emit(ComingSoonLoaded(currentState.movies, isLoadingMore: true));
-      }
-    }
-
-    try {
-      final movies = await getUpcomingMovies(event.page);
-
-      if (movies.isEmpty) {
-        hasReachedEnd = true;
-        isLoadingMore = false;
-        return;
-      }
-
-      currentPage = event.page;
-
-      if (isFirstPage) {
-        emit(ComingSoonLoaded(movies, isLoadingMore: false));
-      } else {
-        final currentState = state;
-
-        if (currentState is ComingSoonLoaded) {
-          emit(
-            ComingSoonLoaded([
+        emit(
+          ComingSoonLoaded(
+            [
               ...currentState.movies,
               ...movies,
-            ], isLoadingMore: false),
-          );
-        }
+            ],
+            isLoadingMore: false,
+          ),
+        );
       }
-
-      isLoadingMore = false;
-    } catch (e) {
-      isLoadingMore = false;
-
-      emit(ComingSoonError(e.toString()));
     }
+
+    isLoadingMore = false;
+  } catch (e) {
+    isLoadingMore = false;
+
+    emit(
+      ComingSoonError(e.toString()),
+    );
   }
+}
 }
