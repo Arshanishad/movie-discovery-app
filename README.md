@@ -1,8 +1,12 @@
 # 🎬 Movie Discovery App
 
-A Flutter movie discovery application built with the **TMDB API**. The app allows users to discover popular, trending, now-playing, top-rated, and upcoming movies, along with movie search and pagination.
+A Flutter movie discovery application built as part of a technical assignment.
+
+The application uses the **TMDB API** to allow users to discover popular, trending, now-playing, top-rated, and upcoming movies. It also provides movie search, pagination, cached images, loading states, error handling, and retry functionality.
 
 The project follows **Clean Architecture** and uses **BLoC** for state management.
+
+---
 
 ## ✨ Features
 
@@ -10,33 +14,40 @@ The project follows **Clean Architecture** and uses **BLoC** for state managemen
 * 🔥 Trending Movies
 * 🎥 Now Playing Movies
 * ⭐ Top Rated Movies
-* 📅 Upcoming / Coming Soon Movies
-* 🔍 Movie Search with debounce
+* 📅 Upcoming Movies
+* 🔍 Movie Search
+* ⏱️ 400ms Search Debounce
 * 📄 Pagination / Load More
-* 🖼️ Cached movie images
-* ✨ Shimmer loading states
-* ⚠️ Error handling with Retry
-* 📭 Empty states
-* 👤 Profile selection
+* 🖼️ Cached Movie Images
+* ✨ Shimmer Loading States
+* ⚠️ API Error Handling
+* 🔄 Retry on API Failure
+* 📭 Empty States
+* 👤 Profile Selection
 * 📱 Responsive UI
 * 🏗️ Clean Architecture
-* 🔄 BLoC state management
+* 🔄 BLoC State Management
 
-## 🛠️ Tech Stack
+---
 
-| Technology           | Purpose                    |
-| -------------------- | -------------------------- |
-| Flutter              | Cross-platform application |
-| Dart                 | Programming language       |
-| BLoC                 | State management           |
-| Dio                  | HTTP/API requests          |
-| TMDB API             | Movie data                 |
-| Cached Network Image | Image caching              |
-| Shimmer              | Loading placeholders       |
+# 🛠️ Tech Stack
 
-## 🏗️ Architecture
+| Technology           | Purpose               |
+| -------------------- | --------------------- |
+| Flutter              | Application framework |
+| Dart                 | Programming language  |
+| BLoC                 | State management      |
+| Dio                  | HTTP client           |
+| TMDB API             | Movie data            |
+| Cached Network Image | Image caching         |
+| Shimmer              | Loading placeholders  |
+| Logger               | Debug/error logging   |
 
-The application follows **Clean Architecture** with three layers:
+---
+
+# 🏗️ Architecture
+
+The application follows **Clean Architecture** to separate UI, business logic, and data-access responsibilities.
 
 ```text
 Presentation
@@ -48,7 +59,40 @@ Presentation
   TMDB API
 ```
 
-### Project Structure
+### Presentation
+
+Responsible for:
+
+* Screens/pages
+* Widgets
+* BLoC
+* UI states
+* User interactions
+
+### Domain
+
+Responsible for:
+
+* Entities
+* Repository contracts
+* Use cases
+* Application business rules
+
+### Data
+
+Responsible for:
+
+* API communication
+* Data sources
+* Models
+* JSON parsing
+* Repository implementations
+
+This separation makes the application easier to maintain, test, and extend.
+
+---
+
+# 📁 Project Structure
 
 ```text
 lib/
@@ -56,7 +100,8 @@ lib/
 │   ├── api/
 │   │   └── api_client.dart
 │   ├── constants/
-│   │   └── api_constants.dart
+│   │   ├── api_constants.dart
+│   │   └── image_constants.dart
 │   └── theme/
 │
 └── features/
@@ -79,174 +124,355 @@ lib/
     │   ├── domain/
     │   └── presentation/
     │
-    └── comming_soon/
+    └── coming_soon/
         ├── data/
         ├── domain/
         └── presentation/
 ```
 
-## 🌐 API
+---
 
-This project uses the **TMDB API** for real-time movie data.
+# 🌐 API
 
-**Base URL:**
+This application uses the **TMDB API** to retrieve movie information.
+
+### Base URL
 
 ```text
 https://api.themoviedb.org/3
 ```
 
-**Endpoints used:**
+### Endpoints Used
+
+| Endpoint               | Purpose                      |
+| ---------------------- | ---------------------------- |
+| `/movie/popular`       | Fetch popular movies         |
+| `/trending/movie/week` | Fetch weekly trending movies |
+| `/movie/now_playing`   | Fetch now-playing movies     |
+| `/movie/top_rated`     | Fetch top-rated movies       |
+| `/movie/upcoming`      | Fetch upcoming movies        |
+| `/search/movie`        | Search for movies            |
+
+The application consumes movie data from the API rather than using hard-coded movie lists.
+
+---
+
+# 🔐 TMDB API Configuration
+
+A **TMDB API Read Access Token** is required to run the application.
+
+The token is **not hard-coded in the source code** and is not committed to the repository.
+
+The application reads the token using:
+
+```dart
+const String.fromEnvironment('TMDB_TOKEN');
+```
+
+The token is supplied at runtime using Flutter's `--dart-define`.
+
+## Step 1 — Create a TMDB Account
+
+Create/sign in to a TMDB account.
+
+Go to your TMDB account settings and open the **API** section.
+
+Create an API credential and use the:
 
 ```text
-/movie/popular
-/trending/movie/week
-/movie/now_playing
-/movie/top_rated
-/movie/upcoming
-/search/movie
+API Read Access Token
 ```
 
-The application uses real API data rather than hard-coded mock data.
+The application uses the TMDB **Read Access Token**, not the API Key.
 
-## 🔐 API Configuration
+---
 
-The TMDB **API Read Access Token** is not hard-coded or committed to the repository.
+# 🚀 Getting Started
 
-The token is provided at runtime using Flutter's `--dart-define`.
+## Prerequisites
 
-### Run the application
+Make sure the following are installed:
+
+* Flutter SDK
+* Dart SDK
+* Android Studio / Android SDK
+* Git
+* A connected Android device or emulator
+
+Verify Flutter installation:
 
 ```bash
-flutter pub get
-
-flutter run --dart-define=TMDB_TOKEN="YOUR_TMDB_READ_ACCESS_TOKEN"
+flutter doctor
 ```
 
-Replace `YOUR_TMDB_READ_ACCESS_TOKEN` with your actual TMDB Read Access Token.
-
-### Build Release APK
+Check the Flutter version:
 
 ```bash
-flutter build apk --release --dart-define=TMDB_TOKEN="YOUR_TMDB_READ_ACCESS_TOKEN"
+flutter --version
 ```
 
-> ⚠️ Never commit your actual API token to GitHub.
+---
 
-## 🔍 Search
-
-Movie search is implemented using the TMDB search endpoint.
-
-A **400ms debounce** is used to reduce unnecessary API requests while the user is typing.
-
-Search supports:
-
-* Loading state
-* Search results
-* Empty results
-* Error state
-* Clear search
-
-## 📄 Pagination
-
-Pagination is implemented using TMDB's page-based API.
-
-Additional pages are requested as the user approaches the end of the movie list.
-
-Pagination handles:
-
-* Page tracking
-* Loading-more state
-* End-of-results handling
-* Duplicate request prevention
-* Shimmer loading cards
-
-## 🖼️ Image Handling
-
-Movie posters and backdrops are loaded using `CachedNetworkImage`.
-
-The UI provides:
-
-* Image caching
-* Shimmer placeholders
-* Error placeholders
-* Poster/backdrop fallback handling
-
-## ⚠️ Loading & Error Handling
-
-The application provides dedicated states for API operations:
-
-* Shimmer loading
-* Empty state
-* Error state
-* Retry action
-* Pagination loading
-
-This prevents blank screens and provides feedback while network requests are running.
-
-## 📦 Main Dependencies
-
-```yaml
-flutter_bloc:
-dio:
-cached_network_image:
-shimmer:
-```
-
-Install dependencies with:
-
-```bash
-flutter pub get
-```
-
-## 🚀 Getting Started
-
-### 1. Clone the repository
+## 1. Clone the Repository
 
 ```bash
 git clone YOUR_GITHUB_REPOSITORY_URL
 ```
 
-### 2. Open the project
+Navigate to the project:
 
 ```bash
 cd movie_discovery_app
 ```
 
-### 3. Install dependencies
+---
+
+## 2. Install Dependencies
+
+Run:
 
 ```bash
 flutter pub get
 ```
 
-### 4. Add your TMDB token
+---
+
+## 3. Run the Application
+
+Pass the TMDB Read Access Token using `--dart-define`.
 
 ```bash
-flutter run --dart-define=TMDB_TOKEN="YOUR_TMDB_READ_ACCESS_TOKEN"
+flutter run --dart-define="TMDB_TOKEN=YOUR_TMDB_READ_ACCESS_TOKEN"
 ```
 
-### 5. Build APK
+Replace:
+
+```text
+YOUR_TMDB_READ_ACCESS_TOKEN
+```
+
+with your actual TMDB Read Access Token.
+
+### Example
 
 ```bash
-flutter build apk --release --dart-define=TMDB_TOKEN="YOUR_TMDB_READ_ACCESS_TOKEN"
+flutter run --dart-define="TMDB_TOKEN=eyJhbGciOiJIUzI1NiJ9..."
 ```
 
-## 🧪 Code Quality
+> Do not commit the real token to GitHub.
 
-Before submitting the project:
+---
+
+# 📱 Running on a Physical Android Device
+
+Connect an Android phone with **USB Debugging** enabled.
+
+Verify that Flutter detects the device:
+
+```bash
+flutter devices
+```
+
+Then run:
+
+```bash
+flutter run --dart-define="TMDB_TOKEN=YOUR_TMDB_READ_ACCESS_TOKEN"
+```
+
+Flutter will build, install, and launch the application on the connected device.
+
+---
+
+# 📦 Build Release APK
+
+To create a release APK:
+
+```bash
+flutter build apk --release --dart-define="TMDB_TOKEN=YOUR_TMDB_READ_ACCESS_TOKEN"
+```
+
+The generated APK will be located at:
+
+```text
+build/app/outputs/flutter-apk/app-release.apk
+```
+
+The APK can then be installed on an Android device for testing.
+
+---
+
+# 🔍 Movie Search
+
+Movie search uses the TMDB:
+
+```text
+/search/movie
+```
+
+endpoint.
+
+A **400ms debounce** is applied to avoid making an API request for every keystroke.
+
+The search feature handles:
+
+* Search input
+* Debouncing
+* Loading state
+* Search results
+* Empty results
+* API errors
+* Retry
+* Clearing the search
+
+---
+
+# 📄 Pagination
+
+Movie listing endpoints use TMDB's page-based pagination.
+
+When the user approaches the end of the currently loaded movie list, the next page is requested.
+
+Pagination handles:
+
+* Current page tracking
+* Loading-more state
+* Duplicate request prevention
+* End-of-results handling
+* Additional page requests
+* Shimmer loading cards
+
+---
+
+# 🖼️ Image Handling
+
+Movie posters and backdrops are loaded using `CachedNetworkImage`.
+
+The application provides:
+
+* Network image caching
+* Loading placeholders
+* Shimmer effects
+* Error placeholders
+* Fallback handling for missing images
+
+---
+
+# ⚠️ Loading, Empty & Error States
+
+The application provides separate UI states for different API conditions.
+
+### Loading
+
+Displays shimmer placeholders while data is being fetched.
+
+### Success
+
+Displays the retrieved movie data.
+
+### Empty
+
+Displays an appropriate empty state when no movies or search results are available.
+
+### Error
+
+Displays an error message and provides a retry action.
+
+### Pagination Loading
+
+Displays loading indicators while additional pages are being fetched.
+
+This prevents blank screens and gives the user feedback during network operations.
+
+---
+
+# 🔄 API Client
+
+Dio is used as the HTTP client.
+
+The central API client is responsible for:
+
+* Base URL configuration
+* Request timeouts
+* Authorization headers
+* GET requests
+* POST requests
+* PUT requests
+* Multipart requests
+* API error logging
+
+The TMDB token is added to requests using the HTTP `Authorization` header:
+
+```text
+Authorization: Bearer <TMDB_READ_ACCESS_TOKEN>
+```
+
+---
+
+# 🧪 Testing
+
+Run all tests using:
+
+```bash
+flutter test
+```
+
+Run static analysis:
 
 ```bash
 flutter analyze
 ```
 
-Format the code:
+Format the project:
 
 ```bash
-dart format lib
+dart format lib test
 ```
 
-## 📝 Git Commit History
+---
 
-The project was developed using meaningful incremental commits, for example:
+# 📊 Code Quality
+
+The project follows:
+
+* Clean Architecture
+* Separation of concerns
+* Repository pattern
+* Use-case based domain logic
+* BLoC state management
+* Reusable widgets
+* Centralized API configuration
+* Centralized constants
+* Error and loading state handling
+
+---
+
+# 🔒 Security
+
+The TMDB Read Access Token is not committed to the Git repository.
+
+It is provided through:
+
+```bash
+--dart-define="TMDB_TOKEN=YOUR_TMDB_READ_ACCESS_TOKEN"
+```
+
+and accessed in Dart using:
+
+```dart
+const String.fromEnvironment('TMDB_TOKEN');
+```
+
+> **Important:** `--dart-define` prevents the token from being stored in the source repository, but it does not make a credential completely secret inside a distributed mobile application. A token included in a compiled APK may potentially be extracted.
+
+Never commit the actual token to GitHub.
+
+---
+
+# 📝 Git Commit History
+
+The project was developed using meaningful incremental commits.
+
+Examples:
 
 ```text
 feat: add tmdb api client and constants
@@ -264,18 +490,41 @@ fix: prevent duplicate profile navigation
 docs: add project readme
 ```
 
-## 🔒 Security
+---
 
-The TMDB Read Access Token is supplied through `--dart-define` and is not stored in the committed source code.
 
-```dart
-const String.fromEnvironment('TMDB_TOKEN')
+# 📌 Notes for Reviewers
+
+To run this project successfully:
+
+1. Clone the repository.
+2. Install Flutter dependencies.
+3. Obtain a TMDB API Read Access Token.
+4. Pass the token using `--dart-define`.
+5. Run the application using Flutter.
+
+Example:
+
+```bash
+flutter pub get
+
+flutter run --dart-define="TMDB_TOKEN=YOUR_TMDB_READ_ACCESS_TOKEN"
 ```
 
-This keeps the credential out of the Git repository.
-
-> Note: A credential supplied during a release build can still potentially be extracted from the compiled application. `--dart-define` is used here to prevent the token from being committed to source control.
+No API token is required to be added directly to the source code.
 
 ---
 
-**Built with Flutter, Dart, BLoC, Dio and TMDB API.**
+# 🙏 Attribution
+
+This product uses the TMDB API but is not endorsed or certified by TMDB.
+
+Movie data and images are provided by **The Movie Database (TMDB)**.
+
+---
+
+## Built With
+
+**Flutter • Dart • BLoC • Dio • TMDB API**
+
+Built as part of a Flutter technical assignment.
